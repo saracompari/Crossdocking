@@ -1,7 +1,16 @@
-import { router } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { Pressable, Text, TouchableOpacity, View } from "react-native";
 
 export default function Index() {
+    const router = useRouter();
+
+    const logout = async () => {
+        await AsyncStorage.removeItem("auth_token");
+        router.replace("/(auth)/login");
+
+    };
     return (
         <View className="flex-1 bg-white justify-center items-center px-4">
             <TouchableOpacity
@@ -22,6 +31,9 @@ export default function Index() {
                 <Text className="text-white text-xl font-bold text-center mb-2">RILEVAZIONI</Text>
                 <Text className="text-white text-center">Accedi alle rilevazioni in corso.</Text>
             </View>
+            <Pressable onPress={logout} className="absolute top-10 right-6">
+                <FontAwesome name="sign-out" size={28} color="#1e293b" />
+            </Pressable>
         </View>
     );
 }

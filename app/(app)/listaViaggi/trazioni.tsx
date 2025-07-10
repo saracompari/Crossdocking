@@ -1,13 +1,94 @@
-import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { TableUtils } from "@/app/components/TableUtils";
+import api from "@/app/lib/api/api";
+import { Trazione } from '@/app/lib/types/trazione';
+import dayjs from "dayjs";
+import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 
-export default function Trazioni() {
+type ListaTrazioniProps = {
+    navigate: (route: string) => void;
+};
+
+export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
+    const [trazioni, setTrazione] = useState<Trazione[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setErrore] = useState<string | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Funzione per caricare i dati
+    const loadData = useCallback(() => {
+        setErrore(null);
+        return api
+            .get<Trazione[]>("/api/logistica/arrivi/trazioni", {
+                params: {
+                    dallaData: dayjs().format("YYYY-MM-DD"),
+                    allaData: dayjs().format("YYYY-MM-DD"),
+                },
+            })
+            .then((res) => {
+                setTrazione(res.data || []);
+                setErrore(null);
+            })
+            .catch((err) => {
+                setErrore(err.message || "Errore sconosciuto");
+            })
+            .finally(() => {
+                setLoading(false);
+                setRefreshing(false);
+            });
+    }, []);
+
+    // useEffect per caricamento iniziale
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    // Funzione pull to refresh
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        loadData();
+    }, [loadData]);
+
+    if (loading && !refreshing) {
+        return <TableUtils.Loading>Presto verranno caricati i risultati.</TableUtils.Loading>;
+    }
+
+    if (error) {
+        return <TableUtils.Error>{error}</TableUtils.Error>;
+    }
+
+    if (!trazioni || trazioni.length === 0) {
+        return <TableUtils.NoResult>Non ci sono risultati.</TableUtils.NoResult>;
+    }
+
+    const renderItem = ({ item }: { item: Trazione }) => (
+        <TouchableOpacity
+            onPress={() => navigate("/arrivi/trazione/" + item.serial)}
+            className="bg-white p-4 my-2 rounded-lg shadow"
+        >
+            <View className="flex-row justify-between">
+                <View className="flex-1">
+                    <Text className="text-lg font-bold">{item.targa}</Text>
+                    <Text className="text-gray-600 text-sm">{item.vettore}</Text>
+                </View>
+                <View className="flex-1 justify-center items-start">
+                    <Text className="text-gray-700">
+                        {dayjs(item.dataOraArrivo).format("DD/MM/YYYY HH:mm")}
+                    </Text>
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
 
     return (
-        <ScrollView>
-            <View className="flex-row justify-around my-4">
-                <Text>Trazioni</Text>
-            </View>
-        </ScrollView>
+        <FlatList
+            data={trazioni}
+            keyExtractor={(item) => item.serial.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={{ padding: 16 }}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+        />
     );
-};
+}
