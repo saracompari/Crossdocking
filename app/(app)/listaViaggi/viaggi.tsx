@@ -1,16 +1,27 @@
-import { TableUtils } from '@/app/components/TableUtils';
-import api from '@/app/lib/api/api';
-import { Viaggio } from '@/app/lib/types/viaggio';
-import { FontAwesome } from '@expo/vector-icons';
-import dayjs from 'dayjs';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { TableUtils } from "@/app/components/TableUtils";
+import api from "@/app/lib/api/api";
+import { Viaggio } from "@/app/lib/types/viaggio";
+import { FontAwesome } from "@expo/vector-icons";
+import dayjs from "dayjs";
+import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
+
+type ElementoLista = {
+    tipo: "header" | "viaggio";
+    titolo?: string;
+    viaggio?: Viaggio;
+};
 
 export default function Lista() {
     const [viaggi, setViaggi] = useState<Viaggio[]>([]);
     const [loading, setLoading] = useState(true);
     const [errore, setErrore] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [expandedSerial, setExpandedSerial] = useState<number | null>(null);
+
+    const toggleExpand = (serial: number) => {
+        setExpandedSerial(prev => (prev === serial ? null : serial));
+    };
 
     const loadData = useCallback(async () => {
         try {
@@ -47,69 +58,74 @@ export default function Lista() {
         return !arrivo.isSame(today, "day") && !arrivo.isSame(yesterday, "day");
     });
 
+    const elementiLista: ElementoLista[] = [];
+
+    if (viaggiRecenti.length > 0) {
+        elementiLista.push({ tipo: "header", titolo: "Viaggi Recenti" });
+        viaggiRecenti.forEach((v) => elementiLista.push({ tipo: "viaggio", viaggio: v }));
+    }
+
+    if (viaggiAltri.length > 0) {
+        elementiLista.push({ tipo: "header", titolo: "Altri Viaggi" });
+        viaggiAltri.forEach((v) => elementiLista.push({ tipo: "viaggio", viaggio: v }));
+    }
+
+    const renderItem = ({ item }: { item: ElementoLista }) => {
+        if (item.tipo === "header") {
+            return (
+                <Text className="text-lg font-bold text-center mb-2 mt-4">
+                    {item.titolo}
+                </Text>
+            );
+        }
+
+        const viaggio = item.viaggio!;
+        const expanded = expandedSerial === viaggio.serial;
+
+        return (
+            <Pressable
+                onPress={() => toggleExpand(viaggio.serial)}
+                className="bg-white p-4 my-1 rounded-lg shadow">
+                <View className="flex-row justify-between items-center">
+                    <Text className="font-bold">{viaggio.numeroDocumento}</Text>
+                    <Text className="text-sm font-semibold">
+                        {viaggio.numeroSpedizioniConfermate}/{viaggio.numeroSpedizioniTotali}
+                    </Text>
+                </View>
+
+                <View className="flex-row justify-between mt-1">
+                    <Text className="text-sm text-gray-500">{viaggio.descrizione}</Text>
+                    <FontAwesome
+                        name={expanded ? "chevron-up" : "chevron-down"}
+                        size={10}
+                        color="#6b7280"
+                    />
+                </View>
+
+                {expanded && <ListaSpedizioni serial={viaggio.serial} />}
+            </Pressable>
+        );
+    };
+
     return (
-        <ScrollView className="p-4 bg-white" refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }>
+        <>
             {loading && <TableUtils.Loading />}
             {errore && <TableUtils.Error>{errore}</TableUtils.Error>}
             {!loading && !errore && viaggi.length === 0 && <TableUtils.NoResult />}
             {!loading && !errore && (
-                <>
-                    {viaggiRecenti.length > 0 && (
-                        <View className="mb-6">
-                            <Text className="text-lg font-bold text-center mb-2">Viaggi Recenti</Text>
-                            <RenderViaggi lista={viaggiRecenti} />
-                        </View>
-                    )}
-                    {viaggiAltri.length > 0 && (
-                        <View>
-                            <Text className="text-lg font-bold text-center mb-2">Altri Viaggi</Text>
-                            <RenderViaggi lista={viaggiAltri} />
-                        </View>
-                    )}
-                    {viaggiRecenti.length === 0 && viaggiAltri.length === 0 && (
-                        <Text className="text-center">Nessun viaggio disponibile.</Text>
-                    )}
-                </>
+                <FlatList
+                    data={elementiLista}
+                    keyExtractor={(item, index) =>
+                        item.tipo === "header" ? `header-${index}` : `viaggio-${item.viaggio!.serial}`
+                    }
+                    renderItem={renderItem}
+                    contentContainerStyle={{ padding: 16 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
+                />
             )}
-        </ScrollView>
-    );
-}
-
-type Props = {
-    lista: Viaggio[];
-};
-
-function RenderViaggi({ lista }: Props) {
-    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-
-    const toggleExpand = (index: number) => {
-        setExpandedIndex(prev => (prev === index ? null : index));
-    };
-
-    return (
-        <View>
-            {lista.map((v, idx) => {
-                const expanded = expandedIndex === idx;
-
-                return (
-                    <Pressable key={idx} onPress={() => toggleExpand(idx)} className="ps-3 pe-3 py-2 bg-white rounded mb-3 shadow-sm">
-                        <View className="flex-row justify-between items-center">
-                            <Text className="font-bold">{v.numeroDocumento}</Text>
-                            <Text className="text-sm font-semibold">{v.numeroSpedizioniConfermate}/{v.numeroSpedizioniTotali}</Text>
-                        </View>
-
-                        <View className="flex-row justify-between mt-1">
-                            <Text className="text-sm text-gray-500">{v.descrizione}</Text>
-                            <FontAwesome className="my-auto" name={expanded ? "chevron-up" : "chevron-down"} size={10} color="#6b7280" />
-                        </View>
-
-                        {expanded && <ListaSpedizioni serial={v.serial} />}
-                    </Pressable>
-                );
-            })}
-        </View>
+        </>
     );
 }
 
@@ -162,3 +178,4 @@ function ListaSpedizioni({ serial }: { serial: number }) {
         </View>
     );
 }
+

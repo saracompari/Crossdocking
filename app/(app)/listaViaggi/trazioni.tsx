@@ -3,7 +3,7 @@ import api from "@/app/lib/api/api";
 import { Trazione } from '@/app/lib/types/trazione';
 import dayjs from "dayjs";
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
 type ListaTrazioniProps = {
     navigate: (route: string) => void;
@@ -15,7 +15,6 @@ export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
     const [error, setErrore] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Funzione per caricare i dati
     const loadData = useCallback(() => {
         setErrore(null);
         return api
@@ -38,12 +37,10 @@ export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
             });
     }, []);
 
-    // useEffect per caricamento iniziale
     useEffect(() => {
         loadData();
     }, [loadData]);
 
-    // Funzione pull to refresh
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         loadData();
@@ -62,9 +59,9 @@ export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
     }
 
     const renderItem = ({ item }: { item: Trazione }) => (
-        <TouchableOpacity
+        <Pressable
             onPress={() => navigate("/arrivi/trazione/" + item.serial)}
-            className="bg-white p-4 my-2 rounded-lg shadow"
+            className="bg-white p-4 my-1 rounded-lg shadow"
         >
             <View className="flex-row justify-between">
                 <View className="flex-1">
@@ -77,18 +74,22 @@ export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
                     </Text>
                 </View>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     );
 
-    return (
+    return (<>
+        {loading && <TableUtils.Loading />}
+        {error && <TableUtils.Error>{error}</TableUtils.Error>}
+        {!loading && !error && trazioni.length === 0 && <TableUtils.NoResult />}
+        <Text className="text-lg font-bold text-center mt-4">Trazioni</Text>
         <FlatList
             data={trazioni}
             keyExtractor={(item) => item.serial.toString()}
             renderItem={renderItem}
-            contentContainerStyle={{ padding: 16 }}
-            refreshControl={
+            contentContainerStyle={{ padding: 16 }} refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
         />
+    </>
     );
 }

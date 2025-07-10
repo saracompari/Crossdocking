@@ -17,10 +17,12 @@ export default function TabsStackLayout() {
     }, []);
 
     if (checking) return null;
-    return (
+    return (<>
         <Stack>
             <Stack.Screen name="index" options={{ title: 'Home', headerShown: false }} />
             <Stack.Screen name="listaViaggi" options={{ title: 'Lista Viaggi', headerShown: false }} />
+            <Stack.Screen name="nuova-trazione" options={{ title: 'Nuova Trazione', headerShown: true }} />
         </Stack>
+    </>
     );
 }

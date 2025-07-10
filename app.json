@@ -1,5 +1,9 @@
 {
   "expo": {
+    "androidStatusBar": {
+      "hidden": true,
+      "translucent": true
+    },
     "name": "CrossDocking",
     "slug": "CrossDocking",
     "version": "1.0.0",
