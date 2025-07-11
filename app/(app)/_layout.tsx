@@ -21,8 +21,9 @@ export default function TabsStackLayout() {
         <Stack>
             <Stack.Screen name="index" options={{ title: 'Home', headerShown: false }} />
             <Stack.Screen name="listaViaggi" options={{ title: 'Lista Viaggi', headerShown: false }} />
-            <Stack.Screen name="nuova-trazione" options={{ title: 'Nuova Trazione', headerShown: true }} />
-            <Stack.Screen name="trazione/[serialTrazione]" options={{ title: 'Dettaglio Trazione' }} />
+            <Stack.Screen name="trazione" options={{ title: 'Nuova Trazione', headerShown: true }} />
+            <Stack.Screen name="trazione/[serialTrazione]/index" options={{ title: 'Dettaglio Trazione' }} />
+            <Stack.Screen name="trazione/[serialTrazione]/modifica" options={{ title: 'Modifica Trazione' }} />
         </Stack>
     </>
     );

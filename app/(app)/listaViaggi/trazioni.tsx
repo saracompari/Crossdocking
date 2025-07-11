@@ -74,7 +74,7 @@ export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
                     <Text className="text-lg font-bold">{item.targa}</Text>
                     <Text className="text-gray-600 text-sm">{item.vettore}</Text>
                 </View>
-                <View className="flex-1 justify-center items-start">
+                <View className="flex-1 justify-center items-end">
                     <Text className="text-gray-700">
                         {dayjs(item.dataOraArrivo).format("DD/MM/YYYY HH:mm")}
                     </Text>

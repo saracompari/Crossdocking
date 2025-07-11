@@ -1,18 +1,23 @@
 import { Viaggio } from "./viaggio";
 
 export type Trazione = {
-    serial: number;
+    serial?: number;
     targa: string;
     vettore: string;
     sigillo1: string,
     sigillo2: string,
     autista: string,
     dataOraArrivo: Date,
-    viaggiAssociati: Viaggio[],
+    viaggi: Viaggio[],
     note: string,
+    tsConferma?: string | null;
+    userConferma?: string | null;
+    userInsert?: string;
+    dataInsert?: string;
+    userPost?: string | null;
+    dataPost?: string | null;
 };
 
-export type TrazioneForm = Omit<Trazione, 'serial'>;
 
 
 

@@ -15,7 +15,7 @@ export default function ListaViaggiTabsLayout() {
 
                 <TouchableOpacity
                     className="absolute bottom-12 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full bg-greenCeccarelli-primary justify-center items-center shadow-lg"
-                    onPress={() => router.push("/(app)/nuova-trazione")}>
+                    onPress={() => router.push("/(app)/trazione")}>
                     <FontAwesome name="plus" size={32} color="white" />
                 </TouchableOpacity>
             </View>
