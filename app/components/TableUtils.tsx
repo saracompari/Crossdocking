@@ -1,5 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { Text, View } from "react-native";
+import Container from "./Container";
 
 type TableUtilsMessageProps = {
     titolo?: string;
@@ -31,11 +32,13 @@ export default function TableUtilsMessage({
     }
 
     return (
-        <View className="bg-white rounded-xl shadow p-6 items-center space-y-3">
-            {icon && <FontAwesome name={icon} size={iconSize} />}
-            {titolo && <Text className="font-bold text-base text-center">{titolo}</Text>}
-            <Text className="text-sm text-gray-500 text-center">{children}</Text>
-        </View>
+        <Container>
+            <View className="bg-white rounded-xl shadow p-6 items-center space-y-3">
+                {icon && <FontAwesome name={icon} size={iconSize} />}
+                {titolo && <Text className="font-bold text-base text-center">{titolo}</Text>}
+                <Text className="text-sm text-gray-500 text-center">{children}</Text>
+            </View>
+        </Container>
     );
 }
 

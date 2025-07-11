@@ -22,6 +22,7 @@ export default function TabsStackLayout() {
             <Stack.Screen name="index" options={{ title: 'Home', headerShown: false }} />
             <Stack.Screen name="listaViaggi" options={{ title: 'Lista Viaggi', headerShown: false }} />
             <Stack.Screen name="nuova-trazione" options={{ title: 'Nuova Trazione', headerShown: true }} />
+            <Stack.Screen name="trazione/[serialTrazione]" options={{ title: 'Dettaglio Trazione' }} />
         </Stack>
     </>
     );

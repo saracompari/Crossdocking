@@ -161,7 +161,7 @@ function ListaSpedizioni({ serial }: { serial: number }) {
         <View className="mt-3 rounded">
             {data.map((item, index) => (
                 <>
-                    <View key={index} className="ps-1 pe-1 py-1 bg-white rounded mb-3 shadow-sm">
+                    <View key={index + item.serial} className="ps-1 pe-1 py-1 bg-white rounded mb-3 shadow-sm">
                         <View className="flex-row justify-between items-center">
                             <Text className="font-bold">{item.numeroDocumento}</Text>
                             <Text>{item.numeroColliConfermati} / {item.numeroColliTotali}</Text>

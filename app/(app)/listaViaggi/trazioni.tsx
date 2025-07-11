@@ -2,6 +2,7 @@ import { TableUtils } from "@/app/components/TableUtils";
 import api from "@/app/lib/api/api";
 import { Trazione } from '@/app/lib/types/trazione';
 import dayjs from "dayjs";
+import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 
@@ -60,7 +61,12 @@ export default function ListaTrazioni({ navigate }: ListaTrazioniProps) {
 
     const renderItem = ({ item }: { item: Trazione }) => (
         <Pressable
-            onPress={() => navigate("/arrivi/trazione/" + item.serial)}
+            onPress={() =>
+                router.push({
+                    pathname: "/trazione/[serialTrazione]",
+                    params: { serialTrazione: String(item.serial) },
+                })
+            }
             className="bg-white p-4 my-1 rounded-lg shadow"
         >
             <View className="flex-row justify-between">
