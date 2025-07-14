@@ -7,4 +7,11 @@ export type Spedizione = {
     destinatario: string;
     pesoComplessivo?: number;
     volumeComplessivo?: number;
+    epalSegnalati?: number;
+    epalPrevisti?: number;
+    colli: Collo[],
+    rifInterno: string;
+    rifEsterno: string;
+    dimensioni: [];
+    etichettata: boolean;
 };

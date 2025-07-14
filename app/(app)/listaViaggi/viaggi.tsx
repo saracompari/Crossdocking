@@ -15,7 +15,7 @@ type ElementoLista = {
 export default function Lista() {
     const [viaggi, setViaggi] = useState<Viaggio[]>([]);
     const [loading, setLoading] = useState(true);
-    const [errore, setErrore] = useState<string | null>(null);
+    const [error, setErrore] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [expandedSerial, setExpandedSerial] = useState<number | null>(null);
 
@@ -110,9 +110,9 @@ export default function Lista() {
     return (
         <>
             {loading && <TableUtils.Loading />}
-            {errore && <TableUtils.Error>{errore}</TableUtils.Error>}
-            {!loading && !errore && viaggi.length === 0 && <TableUtils.NoResult />}
-            {!loading && !errore && (
+            {error && <TableUtils.Error>{error}</TableUtils.Error>}
+            {!loading && !error && viaggi.length === 0 && <TableUtils.NoResult />}
+            {!loading && !error && (
                 <FlatList
                     data={elementiLista}
                     keyExtractor={(item, index) =>
