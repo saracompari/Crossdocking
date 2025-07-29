@@ -7,17 +7,27 @@ export default function TabsStackLayout() {
     const [checking, setChecking] = useState(true);
 
     useEffect(() => {
-        AsyncStorage.getItem("auth_token").then((token) => {
-            if (!token) {
+        const checkAuth = async () => {
+            const token = await AsyncStorage.getItem("auth_token");
+            const validita = await AsyncStorage.getItem("auth_validita");
+
+            const isTokenValid = token && validita && new Date(validita) > new Date();
+
+            if (!isTokenValid) {
+                await AsyncStorage.removeItem("auth_token");
+                await AsyncStorage.removeItem("auth_validita");
                 router.replace("/(auth)/login");
             } else {
                 setChecking(false);
             }
-        });
+        };
+
+        checkAuth();
     }, []);
 
     if (checking) return null;
-    return (<>
+
+    return (
         <Stack>
             <Stack.Screen name="index" options={{ title: 'Home', headerShown: false }} />
             <Stack.Screen name="listaViaggi" options={{ title: 'Lista Viaggi', headerShown: false }} />
@@ -25,6 +35,5 @@ export default function TabsStackLayout() {
             <Stack.Screen name="trazione/[serialTrazione]/index" options={{ title: 'Dettaglio Trazione' }} />
             <Stack.Screen name="trazione/[serialTrazione]/modifica" options={{ title: 'Modifica Trazione' }} />
         </Stack>
-    </>
     );
 }

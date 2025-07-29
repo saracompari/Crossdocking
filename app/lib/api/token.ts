@@ -6,6 +6,11 @@ export default class Token {
         return await AsyncStorage.getItem('auth_token');
     }
 
+    async getValidita(): Promise<Date | null> {
+        const validita = await AsyncStorage.getItem("auth_validita");
+        return validita ? new Date(validita) : null;
+    }
+
     async saveAuthentication(token: string, callback: (() => void) | null = null) {
         await this.saveCustomAuthentication(null, token, callback);
     }

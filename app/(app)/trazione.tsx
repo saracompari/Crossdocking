@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, ScrollView, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -25,18 +25,16 @@ export default function FormTrazione() {
     });
 
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [viaggiList, setViaggiList] = useState<Viaggio[]>([]);
     const [viaggiOptions, setViaggiOptions] = useState<{ label: string; value: number }[]>([]);
     const [selectedSerials, setSelectedSerials] = useState<number[]>([]);
     const [open, setOpen] = useState(false);
     const [validations, setValidations] = useState({ targa: false, vettore: false, });
+    const isFormValid = useMemo(() => {
+        return Object.values(validations).every(v => v === true);
+    }, [validations]);
 
     useEffect(() => {
-        setLoading(true);
-        setError(null);
-
         api
             .get(`/api/logistica/arrivi/viaggi`, {
                 params: {
@@ -71,16 +69,12 @@ export default function FormTrazione() {
                 );
             })
             .catch((err) => {
-                setError(err.message || "Errore durante il caricamento");
+                console.error(err.message || "Errore durante il caricamento");
             })
-            .finally(() => {
-                setLoading(false);
-            });
     }, []);
 
     useEffect(() => {
         if (serialTrazione) {
-            setLoading(true);
             api
                 .get(`/api/logistica/arrivi/trazioni/${serialTrazione}`)
                 .then((res) => {
@@ -89,15 +83,17 @@ export default function FormTrazione() {
                         ...data,
                         dataOraArrivo: new Date(data.dataOraArrivo),
                     });
+                    setValidations({
+                        targa: !!data.targa,
+                        vettore: !!data.vettore,
+                    });
                     setSelectedSerials(data.viaggi.map((v: any) => v.serial));
                 })
                 .catch((err) => {
-                    setError('Errore nel caricamento della trazione');
                     console.error(err);
                 })
-                .finally(() => setLoading(false));
         }
-    }, [serialTrazione]);
+    }, [serialTrazione,]);
 
     function handleChange(key: string, value: any) {
         setForm(prev => ({ ...prev, [key]: value }));
@@ -117,9 +113,6 @@ export default function FormTrazione() {
     };
 
     const handleSubmit = async () => {
-        setLoading(true);
-        setError(null);
-
         const payload = {
             ...form,
             serialViaggi: selectedSerials,
@@ -140,14 +133,9 @@ export default function FormTrazione() {
             });
         } catch (err) {
             console.error(err);
-            setError('Errore durante il salvataggio');
             Alert.alert('Errore', 'Errore durante il salvataggio');
-        } finally {
-            setLoading(false);
         }
     };
-
-    const isFormValid = Object.values(validations).every(v => v === true);
 
     return (
         <ScrollView className="p-4 bg-white">
@@ -157,7 +145,7 @@ export default function FormTrazione() {
                     <ValidatedTextInput
                         name="targa"
                         value={form.targa}
-                        onChangeText={(text) => handleChange("targa", text)}
+                        onChangeText={(text) => handleChange("targa", text.toUpperCase())}
                         placeholder="Targa" required
                         onValidate={(isValid) => handleValidation("targa", isValid)}
                         maxLength={7} />

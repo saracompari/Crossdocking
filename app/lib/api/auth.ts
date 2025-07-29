@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-export const login = async (utente: string, password: string) => {
+export const login = async (utente: string, password: string,) => {
     try {
         const response = await axios.post("http://api2.ceccarelligroup.it/api/sicurezza/login", {
             utente,
@@ -9,13 +9,14 @@ export const login = async (utente: string, password: string) => {
         });
 
         const token = response.data?.token;
-        if (!token) {
-            throw new Error("Token mancante nella risposta");
+        const validita = response.data?.validita;
+
+        if (!token || !validita) {
+            throw new Error("Token o validità mancanti nella risposta");
         }
 
-        console.log(token)
-
         await AsyncStorage.setItem("auth_token", token);
+        await AsyncStorage.setItem("auth_validita", validita);
         return token;
     } catch (err: any) {
         console.error("Login error:", err.message);
